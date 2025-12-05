@@ -1,11 +1,13 @@
 # Contributing to PiKVM AWS IoT Setup
 
-Thank you for your interest in contributing! This document provides guidelines for contributing to this project.
+Thank you for your interest in contributing! This document provides guidelines
+for contributing to this project.
 
 ## 🚀 Getting Started
 
 1. Fork the repository
-2. Clone your fork: `git clone https://github.com/your-username/pikvm-aws-iot-setup.git`
+2. Clone your fork:
+   `git clone https://github.com/your-username/pikvm-aws-iot-setup.git`
 3. Create a feature branch: `git checkout -b feature/amazing-feature`
 4. Make your changes
 5. Test your changes on actual PiKVM hardware
@@ -111,6 +113,7 @@ Follow conventional commits:
 ```
 
 Types:
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation changes
@@ -120,6 +123,7 @@ Types:
 - `chore`: Maintenance tasks
 
 Example:
+
 ```
 feat: Add certificate backup functionality
 
@@ -143,12 +147,14 @@ If you discover a security vulnerability:
 
 Have questions? Feel free to:
 
-- Open a [Discussion](https://github.com/ChezGroup/pikvm-aws-iot-setup/discussions)
+- Open a
+  [Discussion](https://github.com/ChezGroup/pikvm-aws-iot-setup/discussions)
 - Ask in an existing issue
 - Check the [FAQ](README.md#faq)
 
 ## 📄 License
 
-By contributing, you agree that your contributions will be licensed under the MIT License.
+By contributing, you agree that your contributions will be licensed under the
+MIT License.
 
 Thank you for contributing! 🎉

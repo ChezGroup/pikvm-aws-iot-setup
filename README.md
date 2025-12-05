@@ -3,7 +3,8 @@
 [![ShellCheck](https://github.com/ChezGroup/pikvm-aws-iot-setup/actions/workflows/shellcheck.yml/badge.svg)](https://github.com/ChezGroup/pikvm-aws-iot-setup/actions/workflows/shellcheck.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Production-ready scripts for configuring PiKVM devices to connect to AWS IoT Core via MQTT bridge using Mosquitto.
+Production-ready scripts for configuring PiKVM devices to connect to AWS IoT
+Core via MQTT bridge using Mosquitto.
 
 ## 🚀 Quick Start
 
@@ -21,10 +22,13 @@ wget -qO- https://raw.githubusercontent.com/ChezGroup/pikvm-aws-iot-setup/main/i
 
 ## 📋 What's Included
 
-- **`setup_aws_iot_certificates.sh`** - Generates and configures AWS IoT certificates
-- **`setup_mqtt_local_broker.sh`** - Sets up Mosquitto MQTT broker in bridge mode
+- **`setup_aws_iot_certificates.sh`** - Generates and configures AWS IoT
+  certificates
+- **`setup_mqtt_local_broker.sh`** - Sets up Mosquitto MQTT broker in bridge
+  mode
 - **`troubleshoot_aws_iot.sh`** - Diagnoses and fixes AWS IoT connection issues
-- **`manage_certificates.sh`** - Manages certificate lifecycle (backup, restore, verify)
+- **`manage_certificates.sh`** - Manages certificate lifecycle (backup, restore,
+  verify)
 - **`install.sh`** - Quick installer script
 - **`config/config.sh.example`** - Configuration template
 
@@ -41,17 +45,17 @@ mkdir -p /root/pikvm-setup
 cd /root/pikvm-setup
 
 # Download individual scripts
-curl -O https://raw.githubusercontent.com/ChezGroup/tandera/main/pikvm/setup_aws_iot_certificates.sh
-curl -O https://raw.githubusercontent.com/ChezGroup/tandera/main/pikvm/setup_mqtt_local_broker.sh
-curl -O https://raw.githubusercontent.com/ChezGroup/tandera/main/pikvm/troubleshoot_aws_iot.sh
-curl -O https://raw.githubusercontent.com/ChezGroup/tandera/main/pikvm/manage_certificates.sh
+curl -O https://raw.githubusercontent.com/ChezGroup/pikvm-aws-iot-setup/main/setup_aws_iot_certificates.sh
+curl -O https://raw.githubusercontent.com/ChezGroup/pikvm-aws-iot-setup/main/setup_mqtt_local_broker.sh
+curl -O https://raw.githubusercontent.com/ChezGroup/pikvm-aws-iot-setup/main/troubleshoot_aws_iot.sh
+curl -O https://raw.githubusercontent.com/ChezGroup/pikvm-aws-iot-setup/main/manage_certificates.sh
 
 # Make executable
 chmod +x *.sh
 
 # Download configuration template
 mkdir -p config
-curl -o config/config.sh.example https://raw.githubusercontent.com/ChezGroup/tandera/main/pikvm/config/config.sh.example
+curl -o config/config.sh.example https://raw.githubusercontent.com/ChezGroup/pikvm-aws-iot-setup/main/config/config.sh.example
 ```
 
 ## ⚙️ Configuration
@@ -103,6 +107,7 @@ aws configure
 ```
 
 You'll need:
+
 - AWS Access Key ID
 - AWS Secret Access Key
 - Default region (e.g., `us-east-1`)
@@ -115,6 +120,7 @@ cd /root/pikvm-setup
 ```
 
 This will:
+
 - Create AWS IoT Thing (named `pikvm-{PROJECT_PREFIX}-{DEVICE_ID}`)
 - Generate and download certificates
 - Create IoT Policy with appropriate permissions
@@ -127,6 +133,7 @@ This will:
 ```
 
 This will:
+
 - Install Mosquitto
 - Configure bridge mode to AWS IoT
 - Set up local authentication
@@ -139,6 +146,7 @@ This will:
 ```
 
 This will:
+
 - Check certificate status
 - Verify policy attachments
 - Test TLS connection
@@ -255,7 +263,7 @@ For deploying to multiple PiKVM devices:
 
 ```bash
 # On each device
-curl -sSL https://raw.githubusercontent.com/ChezGroup/tandera/main/pikvm/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/ChezGroup/pikvm-aws-iot-setup/main/install.sh | bash
 cd /root/pikvm-setup
 cp config/config.sh.example config/config.sh
 # Edit with same PROJECT_PREFIX
@@ -279,7 +287,7 @@ export CUSTOM_DEVICE_ID="warehouse-1"  # Unique per device
 # Create deployment script
 for device in warehouse-1 warehouse-2 warehouse-3; do
     ssh root@pikvm-$device.local << 'EOF'
-        curl -sSL https://raw.githubusercontent.com/ChezGroup/tandera/main/pikvm/install.sh | bash
+        curl -sSL https://raw.githubusercontent.com/ChezGroup/pikvm-aws-iot-setup/main/install.sh | bash
         cd /root/pikvm-setup
         cp config/config.sh.example config/config.sh
         sed -i 's/my-project/my-company/' config/config.sh
@@ -366,13 +374,13 @@ To use a custom policy, set `AWS_IOT_POLICY_DOCUMENT` in `config/config.sh`.
 
 Default topic mapping (Tasmota compatible):
 
-| Direction | Local Topic | AWS IoT Topic |
-|-----------|-------------|---------------|
-| Out | `tele/+/+/+/SENSOR` | `{THING_NAME}/tele/+/+/+/SENSOR` |
-| Out | `tele/+/+/+/STATE` | `{THING_NAME}/tele/+/+/+/STATE` |
-| Out | `stat/+/+/+/RESULT` | `{THING_NAME}/stat/+/+/+/RESULT` |
-| Out | `stat/+/+/+/POWER` | `{THING_NAME}/stat/+/+/+/POWER` |
-| In  | `cmnd/+` | `{THING_NAME}/cmd/+` |
+| Direction | Local Topic         | AWS IoT Topic                    |
+| --------- | ------------------- | -------------------------------- |
+| Out       | `tele/+/+/+/SENSOR` | `{THING_NAME}/tele/+/+/+/SENSOR` |
+| Out       | `tele/+/+/+/STATE`  | `{THING_NAME}/tele/+/+/+/STATE`  |
+| Out       | `stat/+/+/+/RESULT` | `{THING_NAME}/stat/+/+/+/RESULT` |
+| Out       | `stat/+/+/+/POWER`  | `{THING_NAME}/stat/+/+/+/POWER`  |
+| In        | `cmnd/+`            | `{THING_NAME}/cmd/+`             |
 
 Customize topics in `config/config.sh`:
 
@@ -383,7 +391,8 @@ export MQTT_TOPIC_CMD_PATTERN="commands/#"
 
 ## 🤝 Contributing
 
-Contributions are welcome! This project follows public repository best practices:
+Contributions are welcome! This project follows public repository best
+practices:
 
 1. Fork the repository
 2. Create a feature branch
@@ -396,8 +405,10 @@ These scripts are provided as-is for use with PiKVM and AWS IoT Core.
 
 ## 🆘 Support
 
-- **Issues**: [GitHub Issues](https://github.com/ChezGroup/tandera/issues)
-- **Documentation**: [Project Docs](https://github.com/ChezGroup/tandera/tree/main/docs)
+- **Issues**:
+  [GitHub Issues](https://github.com/ChezGroup/pikvm-aws-iot-setup/issues)
+- **Discussions**:
+  [GitHub Discussions](https://github.com/ChezGroup/pikvm-aws-iot-setup/discussions)
 - **PiKVM Docs**: https://docs.pikvm.org
 
 ## 🔗 Related Projects
@@ -408,4 +419,5 @@ These scripts are provided as-is for use with PiKVM and AWS IoT Core.
 
 ---
 
-**Note**: These scripts are designed for PiKVM running Arch Linux. Adaptations may be needed for other platforms.
+**Note**: These scripts are designed for PiKVM running Arch Linux. Adaptations
+may be needed for other platforms.

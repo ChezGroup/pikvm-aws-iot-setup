@@ -3,9 +3,9 @@
 # This script downloads and sets up the PiKVM AWS IoT configuration scripts
 #
 # Usage:
-#   curl -sSL https://raw.githubusercontent.com/ChezGroup/tandera/main/pikvm/install.sh | bash
+#   curl -sSL https://raw.githubusercontent.com/ChezGroup/pikvm-aws-iot-setup/main/install.sh | bash
 #   or
-#   wget -qO- https://raw.githubusercontent.com/ChezGroup/tandera/main/pikvm/install.sh | bash
+#   wget -qO- https://raw.githubusercontent.com/ChezGroup/pikvm-aws-iot-setup/main/install.sh | bash
 
 set -e
 
@@ -103,14 +103,14 @@ else
     echo
     if [[ ! $REPLY =~ ^[Nn]$ ]]; then
         cp config/config.sh.example config/config.sh
-        
+
         # Prompt for project prefix
         read -p "Enter your project prefix [default-project]: " project_prefix
         project_prefix=${project_prefix:-default-project}
-        
+
         # Update config file with project prefix
         sed -i "s/export PROJECT_PREFIX=\"my-project\"/export PROJECT_PREFIX=\"$project_prefix\"/" config/config.sh
-        
+
         print_success "Configuration file created at config/config.sh"
         print_info "You can edit config/config.sh to customize settings"
     else
@@ -147,5 +147,5 @@ echo "  4. Test your connection:"
 echo "     ${BLUE}cd $INSTALL_DIR && ./troubleshoot_aws_iot.sh${NC}"
 echo ""
 echo "For detailed documentation, visit:"
-echo "  ${BLUE}https://github.com/${REPO_OWNER}/${REPO_NAME}/tree/main/pikvm${NC}"
+echo "  ${BLUE}https://github.com/${REPO_OWNER}/${REPO_NAME}${NC}"
 echo ""

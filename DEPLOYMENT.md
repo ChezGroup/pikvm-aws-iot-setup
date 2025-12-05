@@ -1,6 +1,7 @@
 # Deployment Guide
 
-This guide explains how to deploy the PiKVM AWS IoT Setup scripts to your PiKVM devices.
+This guide explains how to deploy the PiKVM AWS IoT Setup scripts to your PiKVM
+devices.
 
 ## Prerequisites
 
@@ -22,6 +23,7 @@ curl -sSL https://raw.githubusercontent.com/ChezGroup/pikvm-aws-iot-setup/main/i
 ```
 
 This will:
+
 - Download all scripts to `/root/pikvm-setup`
 - Create configuration template
 - Set up directory structure
@@ -115,6 +117,7 @@ aws configure
 ```
 
 You'll need:
+
 - AWS Access Key ID
 - AWS Secret Access Key
 - Default region (e.g., `us-east-1`)
@@ -130,6 +133,7 @@ cd /root/pikvm-setup
 ```
 
 This will:
+
 - Create AWS IoT Thing (named `pikvm-{PROJECT_PREFIX}-{DEVICE_ID}`)
 - Generate device certificates
 - Create and attach IoT Policy
@@ -142,6 +146,7 @@ This will:
 ```
 
 This will:
+
 - Install Mosquitto
 - Configure bridge to AWS IoT
 - Set up local authentication
@@ -154,6 +159,7 @@ This will:
 ```
 
 This will:
+
 - Check certificate status
 - Verify policy attachments
 - Test TLS connection
@@ -191,7 +197,7 @@ DEVICES=(
 
 for device in "${DEVICES[@]}"; do
     echo "Deploying to $device..."
-    
+
     ssh root@$device bash <<'SCRIPT'
         curl -sSL https://raw.githubusercontent.com/ChezGroup/pikvm-aws-iot-setup/main/install.sh | bash
         cd /root/pikvm-setup
@@ -213,20 +219,23 @@ Example Ansible playbook:
 - name: Deploy PiKVM AWS IoT Setup
   hosts: pikvms
   become: yes
-  
+
   tasks:
     - name: Enable write mode
       command: rw
-      
+
     - name: Run installer
-      shell: curl -sSL https://raw.githubusercontent.com/ChezGroup/pikvm-aws-iot-setup/main/install.sh | bash
-      
+      shell:
+        curl -sSL
+        https://raw.githubusercontent.com/ChezGroup/pikvm-aws-iot-setup/main/install.sh
+        | bash
+
     - name: Configure project prefix
       lineinfile:
         path: /root/pikvm-setup/config/config.sh
         line: 'export PROJECT_PREFIX="my-company"'
         create: yes
-        
+
     - name: Return to read-only
       command: ro
 ```
@@ -323,9 +332,11 @@ ro
 ## Support
 
 For deployment issues:
+
 - Check [Troubleshooting Guide](README.md#troubleshooting)
 - Review logs: `journalctl -u mosquitto -n 100`
-- Open an issue: [GitHub Issues](https://github.com/ChezGroup/pikvm-aws-iot-setup/issues)
+- Open an issue:
+  [GitHub Issues](https://github.com/ChezGroup/pikvm-aws-iot-setup/issues)
 
 ---
 

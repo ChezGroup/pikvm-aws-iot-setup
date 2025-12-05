@@ -61,7 +61,7 @@ for script in *.sh; do
             chmod +x "$script"
             print_success "Fixed: $script is now executable"
         fi
-        
+
         # Check syntax
         if bash -n "$script"; then
             print_success "$script: syntax OK"

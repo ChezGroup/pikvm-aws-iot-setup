@@ -10,7 +10,7 @@ jobs:
   validate:
     name: Validate Shell Scripts
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -96,7 +96,7 @@ jobs:
             "manage_certificates.sh"
             "install.sh"
           )
-          
+
           for script in "${required_scripts[@]}"; do
             if [ ! -f "$script" ]; then
               echo "❌ Required script missing: $script"
@@ -112,11 +112,11 @@ jobs:
             echo "❌ README.md not found"
             exit 1
           fi
-          
+
           # Check that README contains essential sections
           if ! grep -q "Quick Start" README.md; then
             echo "❌ README.md missing Quick Start section"
             exit 1
           fi
-          
+
           echo "✅ README.md is valid"
