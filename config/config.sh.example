@@ -1,0 +1,139 @@
+#!/bin/bash
+# PiKVM AWS IoT Setup Configuration
+# Copy this file to config.sh and customize for your environment
+# DO NOT commit config.sh to version control (it's in .gitignore)
+
+# =============================================================================
+# PROJECT CONFIGURATION
+# =============================================================================
+
+# Project prefix used for naming AWS IoT Things
+# This will be used as: pikvm-${PROJECT_PREFIX}-${DEVICE_ID}
+# Example: "project1" results in "pikvm-project1-abc12345"
+export PROJECT_PREFIX="my-project"
+
+# =============================================================================
+# AWS CONFIGURATION
+# =============================================================================
+
+# AWS Region for IoT Core (will be auto-detected from AWS CLI config if not set)
+# Example: us-east-1, eu-west-1, sa-east-1
+# export AWS_REGION="us-east-1"
+
+# AWS IoT Endpoint (will be auto-detected if not set)
+# Example: a1b2c3d4e5f6g7-ats.iot.us-east-1.amazonaws.com
+# export AWS_IOT_ENDPOINT=""
+
+# =============================================================================
+# MQTT TOPIC CONFIGURATION
+# =============================================================================
+
+# MQTT Topic prefixes for Tasmota/MQTT integration
+# These define how messages are routed between local broker and AWS IoT
+
+# Outbound topics (PiKVM → AWS IoT)
+# Sensor telemetry data
+export MQTT_TOPIC_TELE_SENSOR="tele/+/+/+/SENSOR"
+
+# Device state information
+export MQTT_TOPIC_TELE_STATE="tele/+/+/+/STATE"
+
+# Command results
+export MQTT_TOPIC_STAT_RESULT="stat/+/+/+/RESULT"
+
+# Power state changes
+export MQTT_TOPIC_STAT_POWER="stat/+/+/+/POWER"
+
+# Inbound topics (AWS IoT → PiKVM)
+# Command topic pattern (will be prefixed with thing name)
+export MQTT_TOPIC_CMD_PATTERN="cmd/#"
+
+# Local command topic prefix
+export MQTT_TOPIC_CMND_PREFIX="cmnd/"
+
+# =============================================================================
+# CERTIFICATE CONFIGURATION
+# =============================================================================
+
+# Certificate storage directory (relative to PST)
+export CERT_DIR_NAME="mosquitto/certs"
+
+# =============================================================================
+# MOSQUITTO CONFIGURATION
+# =============================================================================
+
+# Local MQTT broker port
+export MQTT_LOCAL_PORT="1883"
+
+# Connection keep-alive interval (seconds)
+export MQTT_KEEPALIVE="60"
+
+# Bridge restart timeout (seconds)
+export MQTT_RESTART_TIMEOUT="10"
+
+# Maximum packet size
+export MQTT_MAX_PACKET_SIZE="268435455"
+
+# =============================================================================
+# AWS IOT POLICY CONFIGURATION
+# =============================================================================
+
+# Custom AWS IoT Policy document (optional)
+# If not set, a default permissive policy will be used
+# This should be a JSON string
+# export AWS_IOT_POLICY_DOCUMENT='{
+#   "Version": "2012-10-17",
+#   "Statement": [
+#     {
+#       "Effect": "Allow",
+#       "Action": "iot:Connect",
+#       "Resource": "arn:aws:iot:*:*:client/${iot:ClientId}"
+#     },
+#     {
+#       "Effect": "Allow",
+#       "Action": ["iot:Publish", "iot:Receive"],
+#       "Resource": "arn:aws:iot:*:*:topic/${iot:ClientId}/*"
+#     },
+#     {
+#       "Effect": "Allow",
+#       "Action": "iot:Subscribe",
+#       "Resource": "arn:aws:iot:*:*:topicfilter/${iot:ClientId}/*"
+#     }
+#   ]
+# }'
+
+# =============================================================================
+# DEVICE IDENTIFICATION
+# =============================================================================
+
+# Device ID generation method
+# Options: "cpu-serial" (default), "mac-address", "custom"
+export DEVICE_ID_METHOD="cpu-serial"
+
+# Custom Device ID (only used if DEVICE_ID_METHOD="custom")
+# export CUSTOM_DEVICE_ID="my-custom-id"
+
+# Number of characters from CPU serial to use (default: 8)
+export DEVICE_ID_LENGTH="8"
+
+# =============================================================================
+# BRIDGE MODE CONFIGURATION (for non-AWS IoT setups)
+# =============================================================================
+
+# Remote MQTT broker address (only for password-based bridge)
+# Example: mqtt.example.com:1883
+# export BRIDGE_ADDRESS=""
+
+# Remote broker credentials (only for password-based bridge)
+# export BRIDGE_REMOTE_USER=""
+# export BRIDGE_REMOTE_PASSWORD=""
+
+# =============================================================================
+# LOGGING AND DEBUGGING
+# =============================================================================
+
+# Enable verbose logging
+export VERBOSE_LOGGING="false"
+
+# Enable debug mode (will show all commands)
+export DEBUG_MODE="false"

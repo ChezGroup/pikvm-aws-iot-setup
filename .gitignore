@@ -1,0 +1,29 @@
+# .gitignore for PiKVM AWS IoT Setup
+
+# Configuration files (contain sensitive data)
+config/config.sh
+
+# Backup files
+*.backup
+*.bak
+*~
+
+# Temporary files
+*.tmp
+*.temp
+.DS_Store
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test outputs
+test-output/
+*.log
+
+# Distribution files
+*.tar.gz
+*.zip
+release/

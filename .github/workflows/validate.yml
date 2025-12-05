@@ -1,0 +1,122 @@
+name: Validate Scripts
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+    name: Validate Shell Scripts
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check script executability
+        run: |
+          echo "Checking script permissions..."
+          for script in *.sh; do
+            if [ -f "$script" ]; then
+              if [ ! -x "$script" ]; then
+                echo "❌ $script is not executable"
+                exit 1
+              else
+                echo "✅ $script is executable"
+              fi
+            fi
+          done
+
+      - name: Validate bash syntax
+        run: |
+          echo "Validating bash syntax..."
+          for script in *.sh; do
+            if [ -f "$script" ]; then
+              if bash -n "$script"; then
+                echo "✅ $script: syntax OK"
+              else
+                echo "❌ $script: syntax error"
+                exit 1
+              fi
+            fi
+          done
+
+      - name: Check for hardcoded credentials
+        run: |
+          echo "Checking for hardcoded credentials..."
+          if grep -rE "(password|secret|key|token)\s*=\s*['\"][^'\"]+['\"]" --include="*.sh" .; then
+            echo "❌ Found potential hardcoded credentials"
+            exit 1
+          else
+            echo "✅ No hardcoded credentials found"
+          fi
+
+      - name: Verify configuration template exists
+        run: |
+          if [ ! -f "config/config.sh.example" ]; then
+            echo "❌ config/config.sh.example not found"
+            exit 1
+          else
+            echo "✅ Configuration template exists"
+          fi
+
+      - name: Validate install script
+        run: |
+          echo "Validating install script..."
+          # Check that install script has required variables
+          if ! grep -q "REPO_OWNER=" install.sh; then
+            echo "❌ install.sh missing REPO_OWNER"
+            exit 1
+          fi
+          if ! grep -q "REPO_NAME=" install.sh; then
+            echo "❌ install.sh missing REPO_NAME"
+            exit 1
+          fi
+          echo "✅ install.sh validated"
+
+      - name: Check for TODO/FIXME comments
+        run: |
+          echo "Checking for TODO/FIXME comments..."
+          if grep -rn "TODO\|FIXME" --include="*.sh" .; then
+            echo "⚠️ Found TODO/FIXME comments (informational only)"
+          else
+            echo "✅ No TODO/FIXME comments found"
+          fi
+        continue-on-error: true
+
+      - name: Validate required scripts exist
+        run: |
+          echo "Checking required scripts..."
+          required_scripts=(
+            "setup_aws_iot_certificates.sh"
+            "setup_mqtt_local_broker.sh"
+            "troubleshoot_aws_iot.sh"
+            "manage_certificates.sh"
+            "install.sh"
+          )
+          
+          for script in "${required_scripts[@]}"; do
+            if [ ! -f "$script" ]; then
+              echo "❌ Required script missing: $script"
+              exit 1
+            else
+              echo "✅ $script exists"
+            fi
+          done
+
+      - name: Check README exists and is valid
+        run: |
+          if [ ! -f "README.md" ]; then
+            echo "❌ README.md not found"
+            exit 1
+          fi
+          
+          # Check that README contains essential sections
+          if ! grep -q "Quick Start" README.md; then
+            echo "❌ README.md missing Quick Start section"
+            exit 1
+          fi
+          
+          echo "✅ README.md is valid"

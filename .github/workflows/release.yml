@@ -1,0 +1,49 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Create release archive
+        run: |
+          mkdir -p release
+          cp *.sh release/
+          cp -r config release/
+          cp README.md release/
+          cd release
+          tar -czf ../pikvm-aws-iot-setup-${{ steps.get_version.outputs.VERSION }}.tar.gz *
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          if [ -f CHANGELOG.md ]; then
+            # Extract changelog for this version
+            awk '/^## \[${{ steps.get_version.outputs.VERSION }}\]/,/^## \[/' CHANGELOG.md | sed '$d' > RELEASE_NOTES.md
+          else
+            echo "Release ${{ steps.get_version.outputs.VERSION }}" > RELEASE_NOTES.md
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: RELEASE_NOTES.md
+          files: |
+            pikvm-aws-iot-setup-${{ steps.get_version.outputs.VERSION }}.tar.gz
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
