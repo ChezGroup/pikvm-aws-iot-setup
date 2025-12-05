@@ -79,12 +79,12 @@ if [ -n "$AWS_IOT_ENDPOINT" ]; then
     echo "Using configured AWS IoT endpoint: $AWS_IOT_ENDPOINT"
 else
     AWS_IOT_ENDPOINT=$(aws iot describe-endpoint --endpoint-type iot:Data-ATS --query 'endpointAddress' --output text)
-    
+
     if [ -z "$AWS_IOT_ENDPOINT" ]; then
         echo "Error: Could not retrieve AWS IoT endpoint"
         exit 1
     fi
-    
+
     echo "Auto-detected AWS IoT Endpoint: $AWS_IOT_ENDPOINT"
 fi
 echo ""
@@ -120,7 +120,7 @@ elif [ "$DEVICE_ID_METHOD" = "mac-address" ]; then
 else
     # Default: use CPU serial
     CPU_SERIAL=$(cat /proc/cpuinfo | grep Serial | cut -d ' ' -f 2)
-    
+
     if [ -z "$CPU_SERIAL" ] || [ "$CPU_SERIAL" = "0000000000000000" ]; then
         echo "Warning: Could not retrieve valid CPU serial number"
         echo "Falling back to MAC address..."
@@ -412,10 +412,38 @@ if ! id mosquitto &>/dev/null; then
              mosquitto || true
 fi
 
-# Fix ownership of all files in PST (must be done outside PST context)
+# Get mosquitto UID and GID
+MOSQUITTO_UID=$(id -u mosquitto)
+MOSQUITTO_GID=$(id -g mosquitto)
+
+# Fix ownership of all files in PST (must be done inside PST context)
 echo "=== Fixing file ownership ==="
-chown -R mosquitto:mosquitto "$PST_CERTS_DIR"
-echo "Ownership set to mosquitto:mosquitto"
+
+# Create helper script to fix ownership inside PST
+cat > /tmp/fix_ownership_in_pst.sh << OWNERSHIP_EOF
+#!/bin/bash
+# Fix ownership of certificate files in PST
+
+CERT_DIR="$CERT_DIR_NAME"
+MOSQUITTO_UID="$MOSQUITTO_UID"
+MOSQUITTO_GID="$MOSQUITTO_GID"
+
+# Change ownership using numeric UID/GID
+chown -R \$MOSQUITTO_UID:\$MOSQUITTO_GID \$KVMD_PST_DATA/\$CERT_DIR
+
+echo "Ownership set to mosquitto:mosquitto (UID:\$MOSQUITTO_UID GID:\$MOSQUITTO_GID)"
+ls -la \$KVMD_PST_DATA/\$CERT_DIR/
+OWNERSHIP_EOF
+
+chmod +x /tmp/fix_ownership_in_pst.sh
+
+# Run ownership fix inside PST context
+kvmd-pstrun -- /tmp/fix_ownership_in_pst.sh --some --script --args
+
+# Clean up
+rm /tmp/fix_ownership_in_pst.sh
+
+echo "File ownership fixed"
 echo ""
 
 # Return to read-only mode

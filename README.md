@@ -58,14 +58,40 @@ mkdir -p config
 curl -o config/config.sh.example https://raw.githubusercontent.com/ChezGroup/pikvm-aws-iot-setup/main/config/config.sh.example
 ```
 
-## ⚙️ Configuration
+## ⚙️ Configuration & Usage
 
-### Step 1: Create Configuration File
+**One-command installation:**
+
+```bash
+curl -sSL https://raw.githubusercontent.com/ChezGroup/pikvm-aws-iot-setup/main/install.sh | bash
+```
+
+**What the installer does:**
+
+1. ✅ Enables write mode on PiKVM (`rw`)
+2. ✅ Downloads all setup scripts
+3. ✅ Creates configuration template
+4. ✅ Returns to read-only mode (`ro`)
+
+**Note:** AWS CLI and Mosquitto are automatically installed when you run the
+setup scripts that need them (`setup_aws_iot_certificates.sh` and
+`setup_mqtt_local_broker.sh` respectively).
+
+### Step 1: Customize Settings
+
+Create your configuration file:
 
 ```bash
 cd /root/pikvm-setup
 cp config/config.sh.example config/config.sh
 nano config/config.sh
+```
+
+**Required Settings:**
+
+```bash
+# Project prefix for naming AWS IoT Things
+export PROJECT_PREFIX="my-company"
 ```
 
 ### Step 2: Customize Settings
