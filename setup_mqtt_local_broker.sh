@@ -96,7 +96,7 @@ echo "=== Creating password file in PST ==="
 read -p "Enter MQTT username: " mqtt_user
 
 # Run the helper script inside PST session
-kvmd-pstrun -- /tmp/create_mosquitto_passwd.sh "$mqtt_user" --some --script --args
+kvmd-pstrun -- /tmp/create_mosquitto_passwd.sh "$mqtt_user"
 
 # Clean up helper script
 rm /tmp/create_mosquitto_passwd.sh
@@ -120,7 +120,7 @@ ENSURE_DIR_EOF
 chmod +x /tmp/ensure_pst_mosquitto_dir.sh
 
 # Ensure directory exists via PST
-kvmd-pstrun -- /tmp/ensure_pst_mosquitto_dir.sh --some --script --args
+kvmd-pstrun -- /tmp/ensure_pst_mosquitto_dir.sh
 
 # Clean up helper script
 rm /tmp/ensure_pst_mosquitto_dir.sh
