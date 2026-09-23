@@ -124,6 +124,33 @@ See `config/config.sh.example` for all available options.
 
 ## 📖 Usage Guide
 
+### Recommended Path: Certificate Mode (AWS IoT)
+
+The certificate-based bridge is the recommended path. Run
+`setup_aws_iot_certificates.sh` first (step 2 below): it stores the
+certificates and `cert-metadata.json` in the PiKVM PST, and
+`setup_mqtt_local_broker.sh` (step 3) auto-detects them and configures the
+TLS bridge to AWS IoT Core on port `8883`, using the thing name
+`pikvm-{PROJECT_PREFIX}-{DEVICE_ID}` as the prefix for all bridged topics.
+
+### Bridge Mode: Password Authentication (External Brokers Only)
+
+If no certificate metadata is found in the PST, the bridge falls back to
+password authentication, which requires `BRIDGE_ADDRESS`,
+`BRIDGE_REMOTE_USER`, and `BRIDGE_REMOTE_PASSWORD` in the environment. This
+mode is meant for external MQTT brokers only and writes directional rules
+only:
+
+- `topic tele/# out 0 "" cloud/` and `topic stat/# out 0 "" cloud/` forward
+  telemetry and status to the central broker under `cloud/`
+- `topic cmnd/# in 0 "" cloud/` receives commands published under
+  `cloud/cmnd/...`
+
+**⚠️ Never use a bidirectional catch-all rule such as
+`topic # both 0 "" cloud/`**: the bridge receives its own published messages
+back and re-publishes them locally, creating an echo/self-loop. The
+directional rules above replaced that pattern.
+
 ### 1. Configure AWS Credentials
 
 Before running the scripts, configure AWS CLI:
@@ -406,7 +433,7 @@ Default topic mapping (Tasmota compatible):
 | Out       | `tele/+/+/+/STATE`  | `{THING_NAME}/tele/+/+/+/STATE`  |
 | Out       | `stat/+/+/+/RESULT` | `{THING_NAME}/stat/+/+/+/RESULT` |
 | Out       | `stat/+/+/+/POWER`  | `{THING_NAME}/stat/+/+/+/POWER`  |
-| In        | `cmnd/+`            | `{THING_NAME}/cmd/+`             |
+| In        | `cmnd/#`            | `{THING_NAME}/cmd/#`             |
 
 Customize topics in `config/config.sh`:
 

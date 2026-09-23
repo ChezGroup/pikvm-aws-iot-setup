@@ -295,7 +295,15 @@ connection central-broker
 address $BRIDGE_ADDRESS
 
 # Specifying which topics are bridged
-topic # both 0 "" cloud/
+# Directional rules only. A bidirectional rule like `topic # both 0 "" cloud/`
+# creates an echo/self-loop: a locally published message is bridged out under
+# cloud/, the bridge receives it again and re-publishes it locally, looping.
+# Forward only telemetry/status topics to the central broker
+topic tele/# out 0 "" cloud/
+topic stat/# out 0 "" cloud/
+
+# Receive commands from the central broker
+topic cmnd/# in 0 "" cloud/
 
 # Bridge authentication
 remote_username $BRIDGE_REMOTE_USER
