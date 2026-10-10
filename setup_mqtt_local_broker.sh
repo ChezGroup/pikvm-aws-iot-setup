@@ -32,7 +32,6 @@ MQTT_TOPIC_TELE_SENSOR="${MQTT_TOPIC_TELE_SENSOR:-tele/+/+/+/SENSOR}"
 MQTT_TOPIC_TELE_STATE="${MQTT_TOPIC_TELE_STATE:-tele/+/+/+/STATE}"
 MQTT_TOPIC_STAT_RESULT="${MQTT_TOPIC_STAT_RESULT:-stat/+/+/+/RESULT}"
 MQTT_TOPIC_STAT_POWER="${MQTT_TOPIC_STAT_POWER:-stat/+/+/+/POWER}"
-MQTT_TOPIC_CMD_PATTERN="${MQTT_TOPIC_CMD_PATTERN:-cmd/#}"
 MQTT_TOPIC_CMND_PREFIX="${MQTT_TOPIC_CMND_PREFIX:-cmnd/}"
 DEBUG_MODE="${DEBUG_MODE:-false}"
 VERBOSE_LOGGING="${VERBOSE_LOGGING:-false}"
@@ -210,8 +209,17 @@ cat > /etc/mosquitto/mosquitto.conf << EOF
 # Using PiKVM PST for persistent data
 
 # General Settings
-persistence false
-autosave_interval 0
+# QoS 1 reliability: messages forwarded to the bridge are upgraded to QoS 1
+# and queued (in memory, plus on disk while the persistence file is writable)
+# until the bridge reconnects. Duplicate delivery is safe: the Tandera
+# pipeline dedupes via deterministic event_id.
+# NOTE: PiKVM boots with a read-only root filesystem, so after a reboot the
+# persistence file cannot be written and queuing degrades to in-memory only
+# (mosquitto logs a persistence error and keeps running - non-fatal).
+persistence true
+persistence_location /var/lib/mosquitto/
+autosave_interval 300
+upgrade_outgoing_qos true
 
 # Logging to journal (systemd)
 log_dest syslog
@@ -246,22 +254,32 @@ address $BRIDGE_ADDRESS
 # Specifying which topics are bridged
 # Forward only telemetry topics to AWS IoT (avoid retained messages)
 # Syntax: topic pattern direction QoS local_prefix remote_prefix
-topic $MQTT_TOPIC_TELE_SENSOR out 0 "" ${THING_NAME}/
-topic $MQTT_TOPIC_TELE_STATE out 0 "" ${THING_NAME}/
-topic $MQTT_TOPIC_STAT_RESULT out 0 "" ${THING_NAME}/
-topic $MQTT_TOPIC_STAT_POWER out 0 "" ${THING_NAME}/
+# QoS 1 on out rules: mosquitto queues messages while the bridge is
+# disconnected and redelivers on reconnect (requires upgrade_outgoing_qos
+# above, because Tasmota publishes at QoS 0).
+topic $MQTT_TOPIC_TELE_SENSOR out 1 "" ${THING_NAME}/
+topic $MQTT_TOPIC_TELE_STATE out 1 "" ${THING_NAME}/
+topic $MQTT_TOPIC_STAT_RESULT out 1 "" ${THING_NAME}/
+topic $MQTT_TOPIC_STAT_POWER out 1 "" ${THING_NAME}/
 
-# Receive commands from AWS IoT directed to this device
-topic ${THING_NAME}/$MQTT_TOPIC_CMD_PATTERN in 0 "" $MQTT_TOPIC_CMND_PREFIX
+# Receive commands from AWS IoT directed to this device.
+# Remote side: ${THING_NAME}/cmd/# (what AWS IoT publishes); local side:
+# cmnd/# (what Tasmota subscribes to). QoS 1 + cleansession false make AWS
+# IoT queue commands for the persistent session while the bridge is offline
+# (session/message expiry ~1h on MQTT 3.1.1).
+topic # in 1 $MQTT_TOPIC_CMND_PREFIX ${THING_NAME}/cmd/
 
 # Setting protocol version explicitly
 bridge_protocol_version mqttv311
 bridge_insecure false
 
 # Bridge connection settings
-cleansession true
+# cleansession false + local_cleansession false keep the remote AWS session
+# and the local bridge subscriptions alive across disconnects, which is what
+# enables the QoS 1 queuing above.
+cleansession false
 remote_clientid ${THING_NAME}
-local_cleansession true
+local_cleansession false
 start_type automatic
 notifications false
 try_private false
@@ -321,6 +339,12 @@ fi
 
 echo "Mosquitto configuration created successfully"
 echo ""
+
+# Persistence directory for QoS 1 message queuing (see persistence_location
+# in the configuration above). Must exist and be writable by the mosquitto
+# user. Re-create after PiKVM OS upgrades if the root filesystem was reset.
+mkdir -p /var/lib/mosquitto
+chown mosquitto:mosquitto /var/lib/mosquitto
 
 echo "=== Configuring systemd service for auto-restart ==="
 # Create systemd drop-in directory for service overrides

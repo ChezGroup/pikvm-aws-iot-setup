@@ -439,7 +439,6 @@ Customize topics in `config/config.sh`:
 
 ```bash
 export MQTT_TOPIC_TELE_SENSOR="custom/sensor/#"
-export MQTT_TOPIC_CMD_PATTERN="commands/#"
 ```
 
 ## 🤝 Contributing

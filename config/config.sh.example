@@ -45,9 +45,6 @@ export MQTT_TOPIC_STAT_RESULT="stat/+/+/+/RESULT"
 export MQTT_TOPIC_STAT_POWER="stat/+/+/+/POWER"
 
 # Inbound topics (AWS IoT → PiKVM)
-# Command topic pattern (will be prefixed with thing name)
-export MQTT_TOPIC_CMD_PATTERN="cmd/#"
-
 # Local command topic prefix
 export MQTT_TOPIC_CMND_PREFIX="cmnd/"
 
